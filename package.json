@@ -1,0 +1,27 @@
+{
+  "name": "@dcodegroup-au/vue-datepicker",
+  "version": "0.0.1",
+  "description": "DcodeGroup's Vue2 datepicker wrapper.",
+  "main": "''",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DCODE-GROUP/vue-datepicker.git"
+  },
+  "keywords": [
+    "Vue",
+    "Datepicker",
+    "DcodeGroup"
+  ],
+  "author": "DcodeGroup",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DCODE-GROUP/vue-datepicker/issues"
+  },
+  "homepage": "https://github.com/DCODE-GROUP/vue-datepicker#readme",
+  "dependencies": {
+    "vue2-datepicker": "^3.10.4"
+  }
+}
