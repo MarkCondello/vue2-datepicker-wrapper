@@ -1,5 +1,5 @@
 <template>
-  <div class="datepicker-wrapper">
+  <div class="datepicker-wrapper test">
     <input
         v-if="isFormInput"
         :id="name"
@@ -25,14 +25,6 @@
         name: 'datepickerWrapper',
         components: {DatePicker},
         props: {
-            format: {
-                type: String,
-                default: 'DD/MM/YYYY',
-            },
-            type: {
-                type: String,
-                default: 'date',
-            },
             value: {
                 type: String | Array,
             },
@@ -54,14 +46,30 @@
         },
         data() {
             return {
+                format: 'DD/MM/YYYY',
+                type: 'date',
                 date: this.value,
-              unconvertedDates: false,
-                counter: 0
+            }
+        },
+        created() { // convert the iso date range array values prop to the format required
+            if (this.date && this.isRange) {
+                const startDate = this.splitDate(this.date[0], '-')
+                this.date[0] = `${startDate[2]}/${startDate[1]}/${startDate[0]}`
+                const endDate = this.splitDate(this.date[1], '-')
+                this.date[1] = `${endDate[2]}/${endDate[1]}/${endDate[0]}`
             }
         },
         methods: {
-            dateToIso(date) {
-               this.counter > 0 ? console.log('reached datetoiso', date) : null
+            splitDate(value, character = '/') {
+                value = value.includes('T') ? value.split('T')[0] : value
+                value = value.includes(' ') ? value.split(' ')[0] : value
+                return value.split(character)
+            },
+            isoToDate(value) { //value needs to be yyyy-mm-dd to be converted to a Date
+                const datePieces = this.splitDate(value)
+                return `${datePieces[2]}-${datePieces[1]}-${datePieces[0]}`
+            },
+            dateToIso(date) { // convert the value to iso to save in the backend
                 return (date instanceof Date)
                     ? `${date.getFullYear()}-${this.padZero(date.getMonth() + 1)}-${this.padZero(date.getDate())}`
                     : null
@@ -73,31 +81,12 @@
         computed: {
             formattedDate() {
                 if (this.date) {
-                    if (this.isRange) {
-                
-                    //     let start = this.date[0]
-                    //     let end = this.date[1]
-                    //    this.counter > 0 ? console.log('date', this.date, {start, end}) : null;
-
-                            //format needs to be yyyy-mm-dd to be converted to a Date
-                        let dateStart =  this.unconvertedDates ? Date(this.date[0]) : this.date[0]
-                        let dateEnd =  this.unconvertedDates ? new Date(this.date[1]) : this.date[1]
-
-                         this.counter > 0 ? console.log({dateStart, dateEnd}) : null;
-                         this.counter > 0 ? console.log(dateStart instanceof Date, dateEnd instanceof Date) : null;
-
-                        let startFormat = this.dateToIso(dateStart)
-                        let endFormat = this.dateToIso(dateEnd)
-
-                        this.counter > 0 ? console.log({startFormat, endFormat}) : null;
-                        this.unconvertedDates = false
-                        this.counter++
-                        console.log('log in formattedDate')
-                        return [startFormat, endFormat]
-                       
+                    if (this.isRange) { //need to convert formattedDate from Y-m-d to d/m/Y
+                        const dateStart = new Date(this.isoToDate(this.date[0]))
+                        const dateEnd =  new Date(this.isoToDate(this.date[1]))
+                        return [this.dateToIso(dateStart), this.dateToIso(dateEnd)]
                     }
-                    let date = new Date(this.date)
-                    return this.dateToIso(date)
+                    return this.dateToIso(new Date(this.isoToDate(this.date)))
                 }
                 else {
                     return null
