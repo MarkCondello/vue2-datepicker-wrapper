@@ -8,6 +8,7 @@
         :value="formattedDate"
     > 
     <date-picker
+        :ref="name"
         v-model="date"
         value-type="format"
         :disabled="isDisabled"
@@ -25,16 +26,21 @@
         name: 'datepickerWrapper',
         components: {DatePicker},
         props: {
-            value: {
-                type: String | Array,
-            },
-            name: {
-                type: String,
-            },
             isFormInput: {
                 type: Boolean,
                 default: false,
             },
+            name: {
+                type: String,
+                default(rawProps) {
+                    return this.isFormInput ? 'date' : null
+                }
+                // required: true, // only required when the component is a form input
+            },
+            value: {
+                type: String | Array,
+            },
+        
             isRange: {
                 type: Boolean,
                 default: false,
@@ -43,6 +49,7 @@
                 default: false,
                 type: Boolean,
             }
+            //ToDo is clearable 
         },
         data() {
             return {
@@ -51,12 +58,17 @@
                 date: this.value,
             }
         },
-        created() { // convert the iso date range array values prop to the format required
-            if (this.date && this.isRange) {
-                const startDate = this.splitDate(this.date[0], '-')
-                this.date[0] = `${startDate[2]}/${startDate[1]}/${startDate[0]}`
-                const endDate = this.splitDate(this.date[1], '-')
-                this.date[1] = `${endDate[2]}/${endDate[1]}/${endDate[0]}`
+        created() { // convert the iso date value prop to the format required
+            if (this.date) {
+                if (this.isRange) {
+                    const dateStartPieces = this.splitDate(this.date[0], '-')
+                    this.date[0] = `${dateStartPieces[2]}/${dateStartPieces[1]}/${dateStartPieces[0]}`
+                    const dateEndPieces = this.splitDate(this.date[1], '-')
+                    this.date[1] = `${dateEndPieces[2]}/${dateEndPieces[1]}/${dateEndPieces[0]}`
+                return
+                }
+                const datePieces = this.splitDate(this.date, '-')
+                this.date = `${datePieces[2]}/${datePieces[1]}/${datePieces[0]}`
             }
         },
         methods: {
@@ -80,15 +92,17 @@
         },
         computed: {
             formattedDate() {
-                if (this.date) {
-                    if (this.isRange) { //need to convert formattedDate from Y-m-d to d/m/Y
-                        const dateStart = new Date(this.isoToDate(this.date[0]))
-                        const dateEnd =  new Date(this.isoToDate(this.date[1]))
-                        return [this.dateToIso(dateStart), this.dateToIso(dateEnd)]
-                    }
+                if (Array.isArray(this.date) && this.isRange && this.date[0] && this.date[1]) { //date is an array and array items have date values
+                    //need to convert formattedDate from Y-m-d to d/m/Y 
+                    const dateStart = new Date(this.isoToDate(this.date[0]))
+                    const dateEnd =  new Date(this.isoToDate(this.date[1]))
+                    return [this.dateToIso(dateStart), this.dateToIso(dateEnd)]
+                } else if (Array.isArray(this.date) && this.isRange && this.date[0] === null && this.date[1] === null) {  // when clearing dates, set the formattedDate array values to null
+                    return [null, null]
+                } else if (this.date && this.isRange === false && Array.isArray(this.date) === false) {
+                     //need to convert formattedDate from Y-m-d to d/m/Y 
                     return this.dateToIso(new Date(this.isoToDate(this.date)))
-                }
-                else {
+                } else { // when clearing dates, set the formattedDate value to null
                     return null
                 }
             },
