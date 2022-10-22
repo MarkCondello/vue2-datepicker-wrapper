@@ -1,5 +1,5 @@
 <template>
-  <div class="datepicker-wrapper test">
+  <div class="datepicker-wrapper">
     <input
         v-if="isFormInput"
         :id="name"
@@ -15,6 +15,7 @@
         :format="format"
         :range="isRange"
         :type="type"
+        :clearable="isClearable"
         @change="$emit('input', date)"
     />
   </div>
@@ -34,22 +35,23 @@
                 type: String,
                 default(rawProps) {
                     return this.isFormInput ? 'date' : null
-                }
-                // required: true, // only required when the component is a form input
+                },
             },
-            value: {
-                type: String | Array,
-            },
-        
             isRange: {
                 type: Boolean,
                 default: false,
             },
-            isDisabled: {
-                default: false,
+            value: {
+                type: String | Array,
+            },
+            isClearable: {
                 type: Boolean,
-            }
-            //ToDo is clearable 
+                default: true,
+            },
+            isDisabled: {
+                type: Boolean,
+                default: false,
+            },
         },
         data() {
             return {
